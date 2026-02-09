@@ -1,0 +1,75 @@
+import json
+import os
+
+FILE_NAME = "students.json"
+
+class Student:
+    def __init__(self, sid, name, grade):
+        self.sid = sid
+        self.name = name
+        self.grade = grade
+
+    def to_dict(self):
+        return {"id": self.sid, "name": self.name, "grade": self.grade}
+
+
+class StudentManager:
+    def __init__(self):
+        self.students = self.load_data()
+
+    def load_data(self):
+        if os.path.exists(FILE_NAME):
+            with open(FILE_NAME, "r") as f:
+                return json.load(f)
+        return {}
+
+    def save_data(self):
+        with open(FILE_NAME, "w") as f:
+            json.dump(self.students, f, indent=4)
+
+    def add_student(self):
+        sid = input("Enter Student ID: ")
+        if sid in self.students:
+            print("❌ Student ID already exists!")
+            return
+        name = input("Enter Name: ")
+        grade = input("Enter Grade: ")
+
+        student = Student(sid, name, grade)
+        self.students[sid] = student.to_dict()
+        self.save_data()
+        print("✅ Student added successfully!")
+
+    def view_students(self):
+        if not self.students:
+            print("No records found.")
+            return
+        for s in self.students.values():
+            print(s)
+
+    def delete_student(self):
+        sid = input("Enter Student ID to delete: ")
+        if sid in self.students:
+            del self.students[sid]
+            self.save_data()
+            print("🗑️ Student deleted.")
+        else:
+            print("❌ Student not found.")
+
+
+manager = StudentManager()
+
+while True:
+    print("\n1.Add  2.View  3.Delete  4.Exit")
+    choice = input("Choose option: ")
+
+    if choice == "1":
+        manager.add_student()
+    elif choice == "2":
+        manager.view_students()
+    elif choice == "3":
+        manager.delete_student()
+    elif choice == "4":
+        break
+    else:
+        print("Invalid choice")
