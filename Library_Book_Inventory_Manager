@@ -1,0 +1,79 @@
+import json
+import os
+
+FILE_NAME = "library.json"
+
+class Book:
+    def __init__(self, title, author):
+        self.title = title
+        self.author = author
+        self.issued = False
+
+    def to_dict(self):
+        return {
+            "title": self.title,
+            "author": self.author,
+            "issued": self.issued
+        }
+
+
+class Library:
+    def __init__(self):
+        self.books = self.load_data()
+
+    def load_data(self):
+        if os.path.exists(FILE_NAME):
+            with open(FILE_NAME, "r") as f:
+                return json.load(f)
+        return []
+
+    def save_data(self):
+        with open(FILE_NAME, "w") as f:
+            json.dump(self.books, f, indent=4)
+
+    def add_book(self):
+        title = input("Enter book title: ")
+        author = input("Enter author name: ")
+        book = Book(title, author)
+        self.books.append(book.to_dict())
+        self.save_data()
+        print("Book added successfully")
+
+    def search_book(self):
+        keyword = input("Search by title/author: ").lower()
+        for book in self.books:
+            if keyword in book["title"].lower() or keyword in book["author"].lower():
+                print(book)
+
+    def issue_book(self):
+        title = input("Enter title to issue: ")
+        for book in self.books:
+            if book["title"] == title and not book["issued"]:
+                book["issued"] = True
+                self.save_data()
+                print("Book issued")
+                return
+        print(" Book not available")
+
+    def report(self):
+        total = len(self.books)
+        issued = sum(1 for b in self.books if b["issued"])
+        print(f"Total Books: {total}, Issued: {issued}")
+
+
+lib = Library()
+
+while True:
+    print("\n1.Add  2.Search  3.Issue  4.Report  5.Exit")
+    ch = input("Choose: ")
+
+    if ch == "1":
+        lib.add_book()
+    elif ch == "2":
+        lib.search_book()
+    elif ch == "3":
+        lib.issue_book()
+    elif ch == "4":
+        lib.report()
+    elif ch == "5":
+        break
