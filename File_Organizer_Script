@@ -1,0 +1,25 @@
+import os
+import shutil
+
+SOURCE_FOLDER = "test_folder"
+DRY_RUN = True   # Change to False to actually move files
+
+def organize_files():
+    for file in os.listdir(SOURCE_FOLDER):
+        path = os.path.join(SOURCE_FOLDER, file)
+
+        if os.path.isfile(path):
+            ext = file.split(".")[-1]
+            folder = os.path.join(SOURCE_FOLDER, ext)
+
+            if not os.path.exists(folder):
+                if not DRY_RUN:
+                    os.mkdir(folder)
+
+            new_path = os.path.join(folder, file)
+
+            print(f"Moving {file} → {folder}")
+            if not DRY_RUN:
+                shutil.move(path, new_path)
+
+organize_files()
