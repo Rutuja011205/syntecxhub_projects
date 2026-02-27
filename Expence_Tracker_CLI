@@ -1,0 +1,56 @@
+import pandas as pd
+import argparse
+from datetime import datetime
+import os
+import matplotlib.pyplot as plt
+
+FILE = "expenses.csv"
+
+def add_entry(date, category, amount, type_):
+    data = {
+        "date": date,
+        "category": category,
+        "amount": float(amount),
+        "type": type_
+    }
+
+    df = pd.DataFrame([data])
+
+    if os.path.exists(FILE):
+        df.to_csv(FILE, mode="a", header=False, index=False)
+    else:
+        df.to_csv(FILE, index=False)
+
+    print("Entry added successfully!")
+
+def monthly_summary():
+    df = pd.read_csv(FILE)
+    df["date"] = pd.to_datetime(df["date"])
+    df["month"] = df["date"].dt.to_period("M")
+
+    summary = df.groupby(["month", "type"])["amount"].sum()
+    print(summary)
+
+    summary.unstack().plot(kind="bar")
+    plt.title("Monthly Income vs Expense")
+    plt.tight_layout()
+    plt.savefig("summary.png")
+    print("Chart saved as summary.png")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Expense Tracker CLI")
+
+    parser.add_argument("--add", action="store_true")
+    parser.add_argument("--date")
+    parser.add_argument("--category")
+    parser.add_argument("--amount")
+    parser.add_argument("--type", choices=["income", "expense"])
+    parser.add_argument("--summary", action="store_true")
+
+    args = parser.parse_args()
+
+    if args.add:
+        add_entry(args.date, args.category, args.amount, args.type)
+
+    if args.summary:
+        monthly_summary()
